@@ -1,4 +1,4 @@
-# AbsoluteCinema
+# SpotifyKeys
 Työkalut: Käytämme applikaation tekemiseen Blazor työkalua, TMBD API:ta sekä tietysti VSC, Trello ja GitHub.
 
 Roolit: ScrumBastard (Jeti), Tuoteomistaja (Paavo), Kehittäjät (Borys ja Olli)
