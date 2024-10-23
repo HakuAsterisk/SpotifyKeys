@@ -6,4 +6,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="SpotifyAPI.Web" Version="7.2.1" />
+  </ItemGroup>
+
 </Project>

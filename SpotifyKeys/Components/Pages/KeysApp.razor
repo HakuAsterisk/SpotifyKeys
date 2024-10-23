@@ -1,0 +1,37 @@
+@page "/KeysApp"
+@rendermode InteractiveServer
+@using SpotifyKeys.Components.Services;
+@using SpotifyAPI.Web;
+@inject IJSRuntime JSRuntime
+@inject HttpClient Http
+@inject IJSRuntime JS
+@inject SpotifyService SpotifyService
+@inject ApiVerified ApiVerified
+<!--Above we find and add our service files with the using and inject keywords
+ so we can use them as methods in this blazor component-->
+
+<style>
+/*CSS*/
+</style>
+
+@code {
+    // C#, below is an example of getting the name of a track from an ID
+    public string song = ""; //Define a string to hold the song name
+    private async Task ShowTrack() //The method does not need to reach outside this component therefore it can be private
+    { //async lets us carry this task out without halting everything else in the meanwhile.
+    //If we wanted to return a value for example an integer instead of Task we would use Task<int>
+        this.song = await SpotifyService.Track(); //Input the result of calling the Track method from our SpotifyService class.
+        if(string.IsNullOrEmpty(this.song)) //We check if anything was returned and if not we instead show an error
+        {
+            this.song = "No track found :("; // sadge
+        }
+    }
+}
+
+<script>
+/*JavaScript*/
+</script>
+
+<!--HTML, the body of the component-->
+<button class="btn btn-success" @onclick="ShowTrack">Show me song</button> <!--When button is clicked we call ShowTrack methods-->
+<h1>@song</h1> <!--Present the contents of the song variable-->

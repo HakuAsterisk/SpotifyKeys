@@ -1,0 +1,41 @@
+{
+  "Files": [
+    {
+      "Id": "C:\\Users\\35844\\Desktop\\SpotifyKeys\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\SpotifyKeys.bundle.scp.css",
+      "PackagePath": "staticwebassets\\SpotifyKeys.bundle.scp.css"
+    },
+    {
+      "Id": "C:\\Users\\35844\\Desktop\\SpotifyKeys\\wwwroot\\app.css",
+      "PackagePath": "staticwebassets\\app.css"
+    },
+    {
+      "Id": "C:\\Users\\35844\\Desktop\\SpotifyKeys\\wwwroot\\bootstrap\\bootstrap.min.css",
+      "PackagePath": "staticwebassets\\bootstrap\\bootstrap.min.css"
+    },
+    {
+      "Id": "C:\\Users\\35844\\Desktop\\SpotifyKeys\\wwwroot\\bootstrap\\bootstrap.min.css.map",
+      "PackagePath": "staticwebassets\\bootstrap\\bootstrap.min.css.map"
+    },
+    {
+      "Id": "C:\\Users\\35844\\Desktop\\SpotifyKeys\\wwwroot\\favicon.png",
+      "PackagePath": "staticwebassets\\favicon.png"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.SpotifyKeys.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.build.SpotifyKeys.props",
+      "PackagePath": "build\\SpotifyKeys.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildMultiTargeting.SpotifyKeys.props",
+      "PackagePath": "buildMultiTargeting\\SpotifyKeys.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildTransitive.SpotifyKeys.props",
+      "PackagePath": "buildTransitive\\SpotifyKeys.props"
+    }
+  ],
+  "ElementsToRemove": []
+}
