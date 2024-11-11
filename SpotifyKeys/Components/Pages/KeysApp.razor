@@ -14,24 +14,79 @@
 /*CSS*/
 </style>
 
-@code {
-    // C#, below is an example of getting the name of a track from an ID
-    public string song = ""; //Define a string to hold the song name
-    private async Task ShowTrack() //The method does not need to reach outside this component therefore it can be private
-    { //async lets us carry this task out without halting everything else in the meanwhile.
-    //If we wanted to return a value for example an integer instead of Task we would use Task<int>
-        this.song = await SpotifyService.Track(); //Input the result of calling the Track method from our SpotifyService class.
-        if(string.IsNullOrEmpty(this.song)) //We check if anything was returned and if not we instead show an error
-        {
-            this.song = "No track found :("; // sadge
-        }
+<div>
+    <input @bind="UserInput" @oninput="OnSearchInput" @onkeydown="HandleKeyDown" placeholder="Search for a song..." />
+    <button @onclick="SaveInput">Search</button>
+</div>
+
+@if (!string.IsNullOrEmpty(songResult))
+{
+    <p>@songResult</p>
+    @if (!string.IsNullOrEmpty(albumImageUrl))
+    {
+        <img src="@albumImageUrl" alt="Album cover" style="width: 200px; height: auto;" />
+    }
+    @if (!string.IsNullOrEmpty(songUrl))
+    {
+        <p><a href="@songUrl" target="_blank">Listen on Spotify</a></p>
     }
 }
 
-<script>
-/*JavaScript*/
-</script>
+@if (suggestedSongs.Any())
+{
+    <ul>
+        @foreach (var song in suggestedSongs)
+        {
+            <li @onclick="() => SelectSong(song)">@song</li>
+        }
+    </ul>
+}
 
-<!--HTML, the body of the component-->
-<button class="btn btn-success" @onclick="ShowTrack">Show me song</button> <!--When button is clicked we call ShowTrack methods-->
-<h1>@song</h1> <!--Present the contents of the song variable-->
+@code {
+    public string UserInput = "";
+    public string songResult = "";
+    public string albumImageUrl = "";
+    public string songUrl = "";
+    private List<string> suggestedSongs = new List<string>();
+    private CancellationTokenSource cts;
+
+    private async Task OnSearchInput(ChangeEventArgs e)
+    {
+        UserInput = e.Value.ToString();
+
+        cts?.Cancel();
+        cts = new CancellationTokenSource();
+        await Task.Delay(500, cts.Token);
+
+        if (!cts.Token.IsCancellationRequested && UserInput.Length > 1)
+        {
+            suggestedSongs = await SpotifyService.SearchTrack(UserInput);
+        }
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await SaveInput();
+        }
+    }
+
+    public async Task SaveInput()
+    {
+        var result = await SpotifyService.GetTrack(UserInput);
+        songResult = result.Item1;
+        albumImageUrl = result.Item2;
+        songUrl = result.Item3;
+
+        Console.WriteLine(songResult);
+
+        suggestedSongs.Clear();
+    }
+
+    private void SelectSong(string song)
+    {
+        UserInput = song;
+        suggestedSongs.Clear();
+    }
+}

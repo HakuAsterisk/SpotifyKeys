@@ -44,5 +44,57 @@ namespace SpotifyKeys.Components.Services
                 throw new Exception($"Error fetching track: {ex.Message}", ex);
             }
         }
+
+        public async Task<(string, string, string)> GetTrack(string inputSong)
+        {
+            var spotify = await ApiVerified.InitializeSpotifyClient(Globals.jetroId, Globals.jetroPass);
+
+            if (spotify == null)
+            {
+                throw new Exception("Failed to initialize Spotify client");
+            }
+
+            // Search for the track using the input song name
+            var requestTrack = new SearchRequest(SearchRequest.Types.Track, inputSong);
+            var searchResult = await spotify.Search.Item(requestTrack);
+
+            if (searchResult.Tracks.Items.Count > 0)
+            {
+                // Get the first track from the search results
+                var firstTrack = searchResult.Tracks.Items[0];
+                var albumImageUrl = firstTrack.Album.Images.Count > 0 ? firstTrack.Album.Images[0].Url : "No image available";
+                var songUrl = firstTrack.ExternalUrls["spotify"];
+
+                return ($"Track: {firstTrack.Name}, Artist: {firstTrack.Artists[0].Name}", albumImageUrl, songUrl);
+            }
+            else
+            {
+                return ("No tracks found.", null, null);
+            }
+        }
+
+
+        public async Task<List<string>> SearchTrack(string input)
+        {
+            var spotify = await ApiVerified.InitializeSpotifyClient(Globals.jetroId, Globals.jetroPass);
+            
+            if (spotify == null)
+            {
+                throw new Exception("Failed to initialize Spotify client");
+            }
+
+            // Search for tracks that match the input
+            var requestTrack = new SearchRequest(SearchRequest.Types.Track, input);
+            var searchResult = await spotify.Search.Item(requestTrack);
+
+            // Collect the track names in a list
+            var trackNames = new List<string>();
+            foreach (var track in searchResult.Tracks.Items)
+            {
+                trackNames.Add(track.Name);
+            }
+
+            return trackNames;
+        }
     }
 }
