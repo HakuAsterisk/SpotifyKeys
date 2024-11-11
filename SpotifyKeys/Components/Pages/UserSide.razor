@@ -1,16 +1,14 @@
 @page "/UserSide"
 @rendermode InteractiveServer
-<MudThemeProvider />
-<MudPopoverProvider />
-<MudDialogProvider />
-<MudSnackbarProvider />
-<MudThemeProvider IsDarkMode="true"/>
-<!--Above we find and add our service files with the using and inject keywords
- so we can use them as methods in this blazor component-->
+
 
 <style>
 /*CSS*/
 </style>
+
+<MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="NavigateHome">
+    Return Home
+</MudButton>
 
 <MudTextField @bind-Value="UserInput" Label="Search for a song..." Variant="Variant.Outlined" Immediate="true"
               OnInput="OnSearchInput" OnKeyDown="HandleKeyDown" />
@@ -50,6 +48,11 @@
     public string songUrl = "";
     private List<string> suggestedSongs = new List<string>();
     private CancellationTokenSource cts;
+
+    private void NavigateHome()
+    {
+        NavigationManager.NavigateTo("/");
+    }
 
     private async Task OnSearchInput(ChangeEventArgs e)
     {
