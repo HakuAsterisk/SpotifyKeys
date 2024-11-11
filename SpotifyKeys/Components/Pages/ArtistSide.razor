@@ -1,12 +1,9 @@
 @page "/ArtistSide"
 @rendermode InteractiveServer
-@inject HttpClient Http
-<MudThemeProvider />
-<MudPopoverProvider />
-<MudDialogProvider />
-<MudSnackbarProvider />
-<MudThemeProvider IsDarkMode="true"/>
 
+<MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="NavigateHome">
+    Return Home
+</MudButton>
 
 <MudContainer Class="mt-12" MaxWidth="MaxWidth.Small">
     <div class="mud-elevation-20 pa-8">
@@ -107,6 +104,11 @@
     private string minLengthString = "0:40";
     private string maxLengthString = "1:00";
     private int chosenButton = 0;
+
+    private void NavigateHome()
+    {
+        NavigationManager.NavigateTo("/");
+    }
 
     private async Task PerformSearch()
     {
