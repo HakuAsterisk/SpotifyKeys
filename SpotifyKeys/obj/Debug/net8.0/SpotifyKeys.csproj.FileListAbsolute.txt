@@ -31,3 +31,6 @@ C:\Users\35844\Desktop\SpotifyKeys\bin\Debug\net8.0\Newtonsoft.Json.dll
 C:\Users\35844\Desktop\SpotifyKeys\bin\Debug\net8.0\SpotifyAPI.Web.dll
 C:\Users\35844\Desktop\SpotifyKeys\obj\Debug\net8.0\SpotifyKeys.csproj.AssemblyReference.cache
 C:\Users\35844\Desktop\SpotifyKeys\obj\Debug\net8.0\SpotifyK.9773B995.Up2Date
+C:\Users\Olli\Desktop\git-clones\SpotifyKeys\SpotifyKeys\obj\Debug\net8.0\SpotifyKeys.dll
+C:\Users\Olli\Desktop\git-clones\SpotifyKeys\SpotifyKeys\obj\Debug\net8.0\refint\SpotifyKeys.dll
+C:\Users\Olli\Desktop\git-clones\SpotifyKeys\SpotifyKeys\obj\Debug\net8.0\SpotifyKeys.pdb
