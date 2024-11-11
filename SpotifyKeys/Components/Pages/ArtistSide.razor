@@ -1,5 +1,6 @@
 @page "/ArtistSide"
 @rendermode InteractiveServer
+@inject HttpClient Http
 <MudThemeProvider />
 <MudPopoverProvider />
 <MudDialogProvider />
@@ -141,12 +142,20 @@
         await connection.OpenAsync();
 
         var command = connection.CreateCommand();
-        command.CommandText = "SELECT * FROM Keys WHERE songId = @songId";
+        command.CommandText = "SELECT COUNT(1) FROM Keys WHERE songId = @songId";
         command.Parameters.AddWithValue("@songId", songId);
 
-        var count = (long)await command.ExecuteScalarAsync();
-        return count > 0; // If there are keys, return true
+        var result = await command.ExecuteScalarAsync();
+        var count = result == null ? 0 : (long)result;
 
+        if (count == 0)
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
     }
 
     private void ConvertSongLength()
@@ -162,7 +171,7 @@
         using var connection = new SqliteConnection($"Data Source={keyDir}");
         await connection.OpenAsync();
 
-        var checkCommand = CheckForKeys();
+        bool keyExists = await CheckForKeys();
 
         string columnStart = chosenButton switch
         {
@@ -181,7 +190,7 @@
         };
 
         var command = connection.CreateCommand();
-        if (await checkCommand) // If there are keys, update them
+        if (keyExists) // If there are keys, update them
         {
             command.CommandText = $"UPDATE Keys SET {columnStart} = @_value, {columnEnd} = @_upperValue WHERE songId = @songId";
         }
