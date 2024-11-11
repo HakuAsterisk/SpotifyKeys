@@ -1,0 +1,93 @@
+@page "/UserSide"
+@rendermode InteractiveServer
+<MudThemeProvider />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+<MudThemeProvider IsDarkMode="true"/>
+<!--Above we find and add our service files with the using and inject keywords
+ so we can use them as methods in this blazor component-->
+
+<style>
+/*CSS*/
+</style>
+
+<MudTextField @bind-Value="UserInput" Label="Search for a song..." Variant="Variant.Outlined" Immediate="true"
+              OnInput="OnSearchInput" OnKeyDown="HandleKeyDown" />
+
+<MudButton OnClick="SaveInput" Variant="Variant.Filled" Color="Color.Primary">Search</MudButton>
+
+@if (!string.IsNullOrEmpty(songResult))
+{
+    <p>@songResult</p>
+    @if (!string.IsNullOrEmpty(albumImageUrl))
+    {
+        <MudImage Src="@albumImageUrl" Alt="Album cover" Style="width: 200px;" />
+    }
+    @if (!string.IsNullOrEmpty(songUrl))
+    {
+        <p><MudLink Href="@songUrl" Target="_blank">Listen on Spotify</MudLink></p>
+    }
+}
+
+@if (suggestedSongs.Any())
+{
+    <MudList T="string">
+        @foreach (var song in suggestedSongs)
+        {
+            <MudListItem T="string" OnClick="() => SelectSong(song)">
+                @song
+            </MudListItem>
+        }
+    </MudList>
+}
+
+
+@code {
+    public string UserInput = "";
+    public string songResult = "";
+    public string albumImageUrl = "";
+    public string songUrl = "";
+    private List<string> suggestedSongs = new List<string>();
+    private CancellationTokenSource cts;
+
+    private async Task OnSearchInput(ChangeEventArgs e)
+    {
+        UserInput = e.Value.ToString();
+
+        cts?.Cancel();
+        cts = new CancellationTokenSource();
+        await Task.Delay(500, cts.Token);
+
+        if (!cts.Token.IsCancellationRequested && UserInput.Length > 1)
+        {
+            suggestedSongs = await SpotifyService.SearchTrack(UserInput);
+        }
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await SaveInput();
+        }
+    }
+
+    public async Task SaveInput()
+    {
+        var result = await SpotifyService.GetTrack(UserInput);
+        songResult = result.Item1;
+        albumImageUrl = result.Item2;
+        songUrl = result.Item3;
+
+        Console.WriteLine(songResult);
+
+        suggestedSongs.Clear();
+    }
+
+    private void SelectSong(string song)
+    {
+        UserInput = song;
+        suggestedSongs.Clear();
+    }
+}

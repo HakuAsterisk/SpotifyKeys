@@ -1,5 +1,7 @@
 using SpotifyKeys.Components;
 using SpotifyKeys.Components.Services;
+using MudBlazor.Services;
+using MudExtensions.Services;
 //This builds the entire razor program and everything related to it. Above you can see refrences to files I've added
 //in order to add the API functionalities we might need.
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +12,10 @@ builder.Services.AddRazorComponents()
 
 // Register HttpClient, neccesary for fetching information from an API.
 builder.Services.AddHttpClient();
+
+// add MudBlazor services and extensions
+builder.Services.AddMudServices();
+builder.Services.AddMudExtensions();
 
 // Register Spotify Service, this is where we the methods needed to fetch and handle the API information
 builder.Services.AddScoped<SpotifyService>();

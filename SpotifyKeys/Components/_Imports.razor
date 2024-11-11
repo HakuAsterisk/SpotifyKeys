@@ -8,4 +8,13 @@
 @using Microsoft.JSInterop
 @using SpotifyKeys.Components
 @using SpotifyKeys.Components.Services
-@using SpotifyAPI.Web;
+@using SpotifyAPI.Web
+@using MudBlazor
+@using MudExtensions
+@using Microsoft.Data.Sqlite;
+@using Microsoft.VisualBasic;
+
+@inject IJSRuntime JSRuntime
+@inject HttpClient Http
+@inject SpotifyService SpotifyService
+@inject ApiVerified ApiVerified

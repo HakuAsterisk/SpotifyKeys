@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\35844\\Desktop\\SpotifyKeys\\SpotifyKeys.csproj": {}
+    "C:\\Users\\35844\\Desktop\\SpotifyKeys-main\\SpotifyKeys\\SpotifyKeys.csproj": {}
   },
   "projects": {
-    "C:\\Users\\35844\\Desktop\\SpotifyKeys\\SpotifyKeys.csproj": {
+    "C:\\Users\\35844\\Desktop\\SpotifyKeys-main\\SpotifyKeys\\SpotifyKeys.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\35844\\Desktop\\SpotifyKeys\\SpotifyKeys.csproj",
+        "projectUniqueName": "C:\\Users\\35844\\Desktop\\SpotifyKeys-main\\SpotifyKeys\\SpotifyKeys.csproj",
         "projectName": "SpotifyKeys",
-        "projectPath": "C:\\Users\\35844\\Desktop\\SpotifyKeys\\SpotifyKeys.csproj",
+        "projectPath": "C:\\Users\\35844\\Desktop\\SpotifyKeys-main\\SpotifyKeys\\SpotifyKeys.csproj",
         "packagesPath": "C:\\Users\\35844\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\35844\\Desktop\\SpotifyKeys\\obj\\",
+        "outputPath": "C:\\Users\\35844\\Desktop\\SpotifyKeys-main\\SpotifyKeys\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -49,6 +49,18 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "CodeBeam.MudBlazor.Extensions": {
+              "target": "Package",
+              "version": "[7.0.2, )"
+            },
+            "Microsoft.Data.Sqlite": {
+              "target": "Package",
+              "version": "[8.0.10, )"
+            },
+            "MudBlazor": {
+              "target": "Package",
+              "version": "[7.15.0, )"
+            },
             "SpotifyAPI.Web": {
               "target": "Package",
               "version": "[7.2.1, )"
@@ -73,7 +85,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.401/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.403/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
