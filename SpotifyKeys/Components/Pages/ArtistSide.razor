@@ -1,5 +1,6 @@
 @page "/ArtistSide"
 @rendermode InteractiveServer
+@inject HttpClient Http
 
 <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="NavigateHome">
     Return Home
@@ -93,7 +94,6 @@
     // MudRangeSlider Variables end
 
     private string searchQuery = "";
-    private SearchResponse searchResponse = new SearchResponse();
     private string alert = "";
     private string songId = "";
     private string songName = "";
@@ -117,7 +117,8 @@
             alert = "Please enter a search query.";
             return;
         }
-        searchResponse = await SpotifyService.Search(searchQuery);
+        var searchResponses = await SpotifyService.SearchTrack(searchQuery);
+        var searchResponse = searchResponses[0];
         if (searchResponse == null)
         {
             alert = "No track found :(";
@@ -125,12 +126,12 @@
         else
         {
             alert = "";
-            songId = searchResponse.Tracks.Items[0].Id;
-            songName = searchResponse.Tracks.Items[0].Name;
-            songLength = searchResponse.Tracks.Items[0].DurationMs / 1000;
-            albumName = searchResponse.Tracks.Items[0].Album.Name;
-            artistName = searchResponse.Tracks.Items[0].Artists[0].Name;
-            albumImage = searchResponse.Tracks.Items[0].Album.Images[0].Url;
+            songId = searchResponse.Id;
+            songName = searchResponse.Name;
+            songLength = searchResponse.DurationMs / 1000;
+            albumName = searchResponse.Album.Name;
+            artistName = searchResponse.Artists[0].Name;
+            albumImage = searchResponse.Album.Images[0].Url;
             _max = songLength;
             ConvertSongLength(); // Use the initial upper value here
         }
