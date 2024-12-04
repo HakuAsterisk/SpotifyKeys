@@ -22,12 +22,16 @@
               TextChanged="OnSearchInput" OnKeyDown="HandleKeyDown" />
 
             <!-- Suggested Songs List Overlay -->
-            @if (suggestedSongs.Any())
-            {
-                    <MudList Class="z-30" T="FullTrack" Color="Color.Tertiary" Style="max-width: 600px; margin: auto; margin-top: 10px;">
-                        @foreach (var track in suggestedSongs)
-                        {
-                            <MudListItem OnClick="() => SelectSong(track)">
+            <MudGrid Style="max-width: 1200px; margin: auto; margin-top: 20px;">
+                <MudItem xs="6">
+                    @if (suggestedTracks.Any())
+                    {
+                        <MudPaper Class="p-3" Style="margin-right: 10px;">
+                            <MudText Typo="Typo.h5" Align="Align.Center">Tracks</MudText>
+                            <MudList Class="z-30" T="FullTrack" Color="Color.Tertiary" Style="max-width: 100%; margin: auto; margin-top: 10px;">
+                                @foreach (var track in suggestedTracks)
+                                {
+                                    <MudListItem OnClick="() => SelectSong(track)">
                                         <AvatarContent>
                                             <MudAvatar>
                                                 <MudImage Src="@track.Album.Images[0].Url" Alt="Album cover" />
@@ -37,10 +41,53 @@
                                             <MudText Typo="Typo.h6">@track.Name</MudText>
                                             <MudText Typo="Typo.input">@track.Artists[0].Name</MudText>
                                         </ChildContent>
-                            </MudListItem>
-                        }
-                    </MudList>
-            }   
+                                    </MudListItem>
+                                }
+                            </MudList>
+                        </MudPaper>
+                    }
+                </MudItem>
+
+                <MudItem xs="6">
+                    @if (suggestedPlaylists.Count > 0)
+                    {
+                        <MudPaper Class="p-3" Style="margin-left: 10px;">
+                            <MudText Typo="Typo.h5" Align="Align.Center">Playlists</MudText>
+                            <MudList Class="z-30" T="FullPlaylist" Color="Color.Tertiary" Style="max-width: 100%; margin: auto; margin-top: 10px;">
+                                @foreach (var playlist in suggestedPlaylists)
+                                {
+                                    <MudListItem OnClick="() => SelectPlaylist(playlist)">
+                                        <AvatarContent>
+                                            <MudAvatar>
+                                                @if (playlist?.Images != null && playlist.Images.Count > 0)
+                                                {
+                                                    <MudImage Src="@playlist.Images[0].Url" Alt="Playlist cover" />
+                                                }
+                                                else
+                                                {
+                                                    <MudText Typo="Typo.h6">No image found!</MudText>
+                                                }
+                                            </MudAvatar>
+                                        </AvatarContent>
+                                        <ChildContent>
+                                            <MudText Typo="Typo.h6">@playlist.Name</MudText>
+                                            @if (playlist?.Owner?.DisplayName != null)
+                                            {
+                                                <MudText Typo="Typo.input">Owner: @playlist.Owner.DisplayName</MudText>
+                                            }
+                                            else
+                                            {
+                                                <MudText Typo="Typo.input">Owner not available</MudText>
+                                            }
+                                        </ChildContent>
+                                    </MudListItem>
+                                }
+                            </MudList>
+                        </MudPaper>
+                    }
+                </MudItem>
+            </MudGrid>
+
 
             <!-- Search Button -->
             <MudButton OnClick="SaveInput" Variant="Variant.Filled" Color="Color.Primary" Style="margin-bottom: 20px;">
@@ -72,7 +119,13 @@
     public string songResult = "";
     public string albumImageUrl = "";
     public string songUrl = "";
-    private List<FullTrack> suggestedSongs = new List<FullTrack>();
+
+    private FullTrack selectedTrack;
+    private FullPlaylist selectedPlaylist;
+
+    private List<FullTrack> suggestedTracks = new List<FullTrack>();
+    private List<FullPlaylist> suggestedPlaylists = new List<FullPlaylist>();
+
     private CancellationTokenSource cts;
     private bool suppressTextChange = false;
 
@@ -100,7 +153,13 @@
             // Only proceed if the request hasn't been canceled and the input length is sufficient
             if (!cts.Token.IsCancellationRequested && UserInput.Length > 1)
             {
-                suggestedSongs = await SpotifyService.SearchTrack(UserInput);
+                suggestedTracks = await SpotifyService.SearchTrack(UserInput);
+                suggestedPlaylists = await SpotifyService.SearchPlaylist(UserInput);
+            }
+
+            foreach (var playlist in suggestedPlaylists)
+            {
+                Console.WriteLine($"Playlist Name: {playlist?.Name}, Images: {playlist?.Images?.Count}, Owner: {playlist?.Owner?.DisplayName}");
             }
         }
         catch (TaskCanceledException)
@@ -119,25 +178,62 @@
 
     public async Task SaveInput()
     {
-        songResult = userSelect.Name;
-        albumImageUrl = userSelect.Album.Images[0].Url;
-        songUrl = userSelect.ExternalUrls["spotify"];
+        if (selectedTrack != null)
+        {
+            songResult = selectedTrack.Name;
+            albumImageUrl = selectedTrack.Album.Images[0].Url;
+            songUrl = selectedTrack.ExternalUrls["spotify"];
+        }
+        else if (selectedPlaylist != null)
+        {
+            songResult = selectedPlaylist.Name;
+            albumImageUrl = selectedPlaylist.Images.FirstOrDefault()?.Url ?? "default-image-url";
+            songUrl = selectedPlaylist.ExternalUrls["spotify"];
+        }
+        else
+        {
+            songResult = "No selection made.";
+            albumImageUrl = "";
+            songUrl = "";
+        }
 
-        suggestedSongs.Clear();
     }
+
 
     private void SelectSong(FullTrack track)
     {
-        // Suppress the TextChanged event temporarily
         suppressTextChange = true;
-
-        // Set UserInput to the selected track's name
         UserInput = track.Name;
+        selectedTrack = track;
 
-        // Optional: if you want to store the selected track for later use
-        userSelect = track;
+        selectedPlaylist = null;
 
-        // Clear the suggestions list
-        suggestedSongs.Clear();
+        songResult = track.Name;
+        albumImageUrl = track.Album.Images[0].Url;
+        songUrl = track.ExternalUrls["spotify"];
+
+        suggestedTracks.Clear();
+        suggestedPlaylists.Clear();
     }
+
+    private void SelectPlaylist(FullPlaylist playlist)
+    {
+        suppressTextChange = true;
+        UserInput = playlist.Name;
+        selectedPlaylist = playlist;
+
+        selectedTrack = null;
+
+        songResult = playlist.Name;
+        albumImageUrl = playlist.Images.FirstOrDefault()?.Url ?? "default-image-url";
+        songUrl = playlist.ExternalUrls["spotify"];
+
+        // Clear suggestions if needed
+        suggestedTracks.Clear();
+        suggestedPlaylists.Clear();
+
+        // Optional: Implement further logic for playlist selection
+    }
+
+    
 }
