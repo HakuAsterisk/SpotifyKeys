@@ -145,7 +145,7 @@
         await connection.OpenAsync();
 
         var command = connection.CreateCommand();
-        command.CommandText = "SELECT COUNT(1) FROM Keys WHERE songId = @songId";
+        command.CommandText = "SELECT COUNT(1) FROM Keys WHERE songid = @songId";
         command.Parameters.AddWithValue("@songId", songId);
 
         var result = await command.ExecuteScalarAsync();
@@ -178,17 +178,17 @@
 
         string columnStart = chosenButton switch
         {
-            1 => "keyonestart",
-            2 => "keytwostart",
-            3 => "keythreestart",
+            1 => "key0",
+            2 => "key2",
+            3 => "key4",
             _ => throw new InvalidOperationException("Invalid button choice")
         };
 
         string columnEnd = chosenButton switch
         {
-            1 => "keyoneend",
-            2 => "keytwoend",
-            3 => "keythreeend",
+            1 => "key1",
+            2 => "key3",
+            3 => "key5",
             _ => throw new InvalidOperationException("Invalid button choice")
         };
 
