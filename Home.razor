@@ -1,0 +1,31 @@
+@page "/"
+@rendermode InteractiveServer
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Home</PageTitle>
+
+<!-- Heading -->
+<h3>Welcome to the Home Page</h3>
+
+<!-- Navigation Buttons -->
+<MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="NavigateToUserSide">
+    Go to User Side
+</MudButton>
+
+<MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="NavigateToArtistSide">
+    Go to Artist Side
+</MudButton>
+
+@code {
+    // Method to navigate to UserSide
+    private void NavigateToUserSide()
+    {
+        NavigationManager.NavigateTo("/UserSide");
+    }
+
+    // Method to navigate to ArtistSide
+    private void NavigateToArtistSide()
+    {
+        NavigationManager.NavigateTo("/ArtistSide");
+    }
+}
