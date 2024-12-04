@@ -61,9 +61,6 @@ namespace SpotifyKeys.Components.Services
                     .Take(10)
                     .ToList();
             }
-
-            Console.WriteLine(playlists.Count);
-
             return playlists;
         }
     }
