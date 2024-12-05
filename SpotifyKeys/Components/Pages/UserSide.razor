@@ -83,6 +83,9 @@
                                             {
                                                 <MudText Typo="Typo.input">Owner not available</MudText>
                                             }
+
+                                            <MudText Typo="Typo.input">| Playlist size: @(playlist.Tracks?.Total ?? 0)</MudText>
+                                            
                                         </ChildContent>
                                     </MudListItem>
                                 }
@@ -93,11 +96,24 @@
             </MudGrid>
 
             <!-- Album Image and Spotify Link -->
-            @if (!string.IsNullOrEmpty(songResult))
+            @if (!string.IsNullOrEmpty(songResult) && selectedType == "track")
             {
                 @if (!string.IsNullOrEmpty(albumImageUrl))
                 {
                     <MudImage Src="@albumImageUrl" Alt="Album cover" Style="width: 200px; margin-bottom: 10px;" />
+                }
+                else
+                {
+                    <MudText Typo="Typo.h6">No image found!</MudText>
+                }
+
+                @if (!string.IsNullOrEmpty(songResult))
+                {
+                    <MudText Typo="Typo.h6">Track: @songResult</MudText>
+                }
+                @if (!string.IsNullOrEmpty(artistName))
+                {
+                    <MudText Typo="Typo.h6">Artist: @artistName</MudText>
                 }
                 @if (!string.IsNullOrEmpty(songUrl))
                 {
@@ -105,12 +121,98 @@
                         Listen on Spotify
                     </MudLink>
                 }
-                @if (songKeys[0] != null)
+                @if (songKeys[0] != null || songKeys[2] != null || songKeys[4] != null)
                 {
-                    <MudText Typo="Typo.h6">Key 1: @songKeys[0] - @songKeys[1]</MudText>
-                    <MudText Typo="Typo.h6">Key 2: @songKeys[2] - @songKeys[3]</MudText>
-                    <MudText Typo="Typo.h6">Key 3: @songKeys[4] - @songKeys[5]</MudText>
+                    @if (songKeys[0] != null)
+                    {
+                        <MudText Typo="Typo.h6">Key 1: @songKeys[0] - @songKeys[1]</MudText>
+                    }
+                    @if (songKeys[2] != null)
+                    {
+                        <MudText Typo="Typo.h6">Key 2: @songKeys[2] - @songKeys[3]</MudText>
+                    }
+                    @if (songKeys[4] != null)
+                    {
+                        <MudText Typo="Typo.h6">Key 3: @songKeys[4] - @songKeys[5]</MudText>
+                    }
                 }
+            }
+
+            @if (!string.IsNullOrEmpty(songResult) && selectedType == "playlist")
+            {
+                <!-- Playlist creator and track information -->
+                <div class="text-center mb-3">
+                    @if (!string.IsNullOrEmpty(ownerName))
+                    {
+                        <MudText Typo="Typo.h6">Playlist creator: @ownerName</MudText>
+                    }
+                    else
+                    {
+                        <MudText Typo="Typo.h6">Creator not available</MudText>
+                    }
+
+                    @if (totalTracks != 0)
+                    {
+                        <MudText Typo="Typo.h6">Viewing track: @(currentTrackIndex + 1) / @(totalTracks)</MudText>
+                    }
+                </div>
+
+                <!-- Album image with navigation buttons -->
+                <MudGrid Class="mb-3 justify-center">
+                    <MudItem class="d-flex align-items-center">
+                        <MudButton OnClick="LoadPreviousTrack" Disabled="@isFirstTrack">Previous</MudButton>
+                    </MudItem>
+                    <MudItem class="text-center">
+
+                        @if (currentTrack != null && !string.IsNullOrEmpty(currentTrack.AlbumImageUrl))
+                        {
+                            <MudImage Src="@currentTrack.AlbumImageUrl" Alt="Album cover" Style="width: 200px; margin-bottom: 10px;" />
+                        }
+                        else
+                        {
+                            <MudText Typo="Typo.h6">No image found!</MudText>
+                        }
+
+                    </MudItem>
+                    <MudItem class="d-flex align-items-center">
+                        <MudButton OnClick="LoadNextTrack" Disabled="@isLastTrack">Next</MudButton>
+                    </MudItem>
+                </MudGrid>
+
+                <!-- Album details -->
+                <div class="text-center mb-3">
+                    @if (currentTrack != null)
+                    {
+                        <MudText Typo="Typo.h6">@currentTrack.Name</MudText>
+                        <MudText Typo="Typo.body2">Artist: @currentTrack.Artist</MudText>
+                        <MudLink Href="@currentTrack.SpotifyUrl" Target="_blank" Style="text-align: center; margin-bottom: 20px;">
+                            Listen on Spotify
+                        </MudLink>
+                    }
+                    else
+                    {
+                        <MudText Typo="Typo.body1">This track isn't available</MudText>
+                    }
+                </div>
+
+                <!-- Song keys -->
+                <div class="text-center">
+                    @if (songKeys[0] != null || songKeys[2] != null || songKeys[4] != null)
+                    {
+                        @if (songKeys[0] != null)
+                        {
+                            <MudText Typo="Typo.h6">Key 1: @songKeys[0] - @songKeys[1]</MudText>
+                        }
+                        @if (songKeys[2] != null)
+                        {
+                            <MudText Typo="Typo.h6">Key 2: @songKeys[2] - @songKeys[3]</MudText>
+                        }
+                        @if (songKeys[4] != null)
+                        {
+                            <MudText Typo="Typo.h6">Key 3: @songKeys[4] - @songKeys[5]</MudText>
+                        }
+                    }
+                </div>
             }
         </div>
     </MudItem>
@@ -119,24 +221,43 @@
 
 @code {
     private string currentDirectory = Directory.GetCurrentDirectory();
+    private string selectedType = "";
     private string keyDir = "";
+    private CancellationTokenSource? cts;
+    private bool suppressTextChange = false;
+
+    //track variables
     private string UserInput = "";
-    private FullTrack userSelect;
     public string songResult = "";
     public string albumImageUrl = "";
     public string songUrl = "";
     private string userInfo = "";
+    private FullTrack? selectedTrack;
+    private List<FullTrack>? suggestedTracks = new List<FullTrack>();
+
+    //playlist variables
     public string[] songKeys = new string[6];
+    private string? ownerName = "";
+    private int? totalTracks = 0;
+    private string? artistName = "";
+    private FullPlaylist? selectedPlaylist;
+    private List<FullPlaylist>? suggestedPlaylists = new List<FullPlaylist>();
 
-    private FullTrack selectedTrack;
-    private FullPlaylist selectedPlaylist;
+    //playlist navigation variables
+    private DisplayTrack? currentTrack;
+    private int currentTrackIndex = 0;
+    private bool isFirstTrack => currentTrackIndex == 0;
+    private bool isLastTrack => currentTrackIndex == totalTracks - 1;
+    private List<DisplayTrack> tracks = new();
 
-    private List<FullTrack> suggestedTracks = new List<FullTrack>();
-    private List<FullPlaylist> suggestedPlaylists = new List<FullPlaylist>();
-
-    private CancellationTokenSource cts;
-    private bool suppressTextChange = false;
-
+    public class DisplayTrack
+    {
+        public string? Name { get; set; }
+        public string? Id { get; set; }
+        public string? Artist { get; set; }
+        public string? AlbumImageUrl { get; set; }
+        public string? SpotifyUrl { get; set; }
+    }
     private void NavigateHome()
     {
         NavigationManager.NavigateTo("/");
@@ -146,7 +267,7 @@
     {
         if (UserInput == "")
         {
-            userInfo = "No selection made.";
+            userInfo = "No selection made."; // If user somehow manages to input search with an empty field
             Clear();
             return;
         }
@@ -183,119 +304,196 @@
     {
         if (e.Key == "Enter")
         {
-            await SaveInput();
+            await SaveInput(); //we handle using enter key to input selection
         }
     }
 
     public async Task SaveInput()
     {
-        if(UserInput == "")
-        {
-            userInfo = "No selection made.";
-            Clear();
-            return;
-        }
-
         if (selectedTrack != null)
         {
             songResult = selectedTrack.Name;
-            albumImageUrl = selectedTrack.Album.Images[0].Url;
+            albumImageUrl = selectedTrack.Album.Images[0].Url; // We save track information to display if track is found
             songUrl = selectedTrack.ExternalUrls["spotify"];
             userInfo = "";
         }
         else if (selectedPlaylist != null)
         {
-            songResult = selectedPlaylist.Name;
-            albumImageUrl = selectedPlaylist.Images.FirstOrDefault()?.Url ?? "default-image-url";
-            songUrl = selectedPlaylist.ExternalUrls["spotify"];
+            songResult = selectedPlaylist?.Name ?? "Unknown Playlist";
+            albumImageUrl = selectedPlaylist.Images != null && selectedPlaylist.Images.Any() ? selectedPlaylist.Images.First().Url : "default-image-url";
+            songUrl = selectedPlaylist.ExternalUrls?["spotify"] ?? "default-url"; // We save playlist information to display if playlist is found
             userInfo = "";
         }
         else
         {
-            userInfo = "No selection made.";
+            userInfo = "No selection made."; // If user somehow manages to input search with an empty field
             Clear();
         }
     }
 
     private async Task SelectSong(FullTrack track)
     {
-        Array.Clear(songKeys);
-        suppressTextChange = true;
+        Array.Clear(songKeys);  // Clear the songKeys array because a new song was selected and we might need to display new keys
+        selectedType = "track"; //select type of data
+        suppressTextChange = true; //prevent autocomplete from popping up again
         UserInput = track.Name;
-        selectedTrack = track;
-
-        selectedPlaylist = null;
-
+        selectedTrack = track;            //save track information to display
+        artistName = track.Artists[0].Name;
+        selectedPlaylist = null; //Make sure that if we had searched for a playlist before, we clear it to avoid layering
         songResult = track.Name;
         albumImageUrl = track.Album.Images[0].Url;
         songUrl = track.ExternalUrls["spotify"];
 
-        await FindSongKey(track.Id);
+        await FindSongKey(track.Id);    //Check if the current selected song has any saved keys in db 
 
         suggestedTracks.Clear();
-        suggestedPlaylists.Clear();
+        suggestedPlaylists.Clear(); //clear the suggestions to avoid layering
     }
 
-    private void SelectPlaylist(FullPlaylist playlist)
+    private async Task SelectPlaylist(FullPlaylist playlist)
     {
-        suppressTextChange = true;
+        Array.Clear(songKeys); // Clear the songKeys array because a new song was selected and we might need to display new keys
+        selectedType = "playlist"; //select type of data
+        suppressTextChange = true; //prevent autocomplete from popping up again
         UserInput = playlist.Name;
         selectedPlaylist = playlist;
-
-        selectedTrack = null;
-
+        totalTracks = playlist.Tracks.Total;
+        ownerName = playlist.Owner.DisplayName; //save information to display later
+        selectedTrack = null; //Make sure that if we had searched for a track before, we clear it to avoid layering
         songResult = playlist.Name;
         albumImageUrl = playlist.Images.FirstOrDefault()?.Url ?? "default-image-url";
         songUrl = playlist.ExternalUrls["spotify"];
 
-        // Clear suggestions if needed
-        suggestedTracks.Clear();
+        suggestedTracks.Clear(); //clear the suggestions to avoid layering
         suggestedPlaylists.Clear();
+
+        currentTrackIndex = 0;
+        tracks.Clear(); // Make sure to clear the tracks list from old data before searching new ones
+
+        // Load all tracks for the playlist
+        await LoadAllTracks();
+        currentTrack = tracks.FirstOrDefault();
     }
+
+    private async Task LoadAllTracks()
+    {
+        if (selectedPlaylist == null) return; // Make sure we have a playlist selected
+        int offset = 0;
+        const int limit = 50; // Spotify API allows a maximum of 50 tracks per request.
+
+        var spotify = await ApiVerified.InitializeSpotifyClient(Globals.jetroId, Globals.jetroPass); // Initialize the Spotify client
+
+        if (spotify == null)
+        {
+            throw new Exception("Failed to initialize Spotify client");
+        }
+
+        while (offset < totalTracks) // Fetch tracks repeatedly until we have them all
+        {
+            if (selectedPlaylist?.Id == null) return; // Playlist ID's can be null, be sure we have one
+
+            var tracksResponse = await spotify.Playlists.GetItems(selectedPlaylist.Id, new PlaylistGetItemsRequest
+            {
+                Offset = offset, //Create a new GET request with the current offset
+                Limit = limit
+            });
+
+            var batchTracks = tracksResponse.Items?
+                .Where(item => item.Track is FullTrack)
+                .Select(item => item.Track as FullTrack) // Filter out only FullTrack objects
+                .Select(track => new DisplayTrack
+                {
+                    Name = track.Name,
+                    Artist = string.Join(", ", track.Artists.Select(artist => artist.Name)),
+                    AlbumImageUrl = track.Album.Images.FirstOrDefault()?.Url ?? "default-image-url", // Filter out any data that might be null to prevent crashes
+                    SpotifyUrl = track.ExternalUrls.TryGetValue("spotify", out var url) ? url : string.Empty
+                }) ?? Enumerable.Empty<DisplayTrack>();
+
+            tracks.AddRange(batchTracks); // Add the fetched tracks to the list
+            offset += limit;
+        }
+    }
+
+
+    private async Task LoadNextTrack()
+    {
+        if (!isLastTrack)
+        {
+            currentTrackIndex++;
+            currentTrack = tracks[currentTrackIndex]; // Load the next track and check for highlights
+            await FetchHighlightsForCurrentTrack();
+        }
+    }
+
+    private async Task LoadPreviousTrack()
+    {
+        if (!isFirstTrack)
+        {
+            currentTrackIndex--;
+            currentTrack = tracks[currentTrackIndex]; // Load the previous track and check for highlights
+            await FetchHighlightsForCurrentTrack();
+        }
+    }
+
+    private async Task FetchHighlightsForCurrentTrack()
+    {
+        if (currentTrack != null)
+        {
+            // Use the current track's ID to fetch highlights
+            if (!string.IsNullOrEmpty(currentTrack.SpotifyUrl))
+            {
+                await FindSongKey(currentTrack.SpotifyUrl.Split('/').LastOrDefault());
+            }
+        }
+    }
+
+
 
     private async Task FindSongKey(string songId)
     {
+        if (string.IsNullOrEmpty(songId)) return;
+
         currentDirectory = Directory.GetCurrentDirectory();
         keyDir = Path.Combine(currentDirectory, "wwwroot", "keysDB.db");
-        using var connection = new SqliteConnection($"Data Source={keyDir}");
+        using var connection = new SqliteConnection($"Data Source={keyDir}"); // Connect to the SQLite database
         await connection.OpenAsync();
 
         var command = connection.CreateCommand();
-        command.CommandText = "SELECT COUNT(1) FROM Keys WHERE songid = @songId";
+        command.CommandText = "SELECT COUNT(1) FROM Keys WHERE songid = @songId"; // Check if the songID has any highlights saved
         command.Parameters.AddWithValue("@songId", songId);
 
         var result = await command.ExecuteScalarAsync();
         if (Convert.ToInt32(result) > 0)
         {
-            command.CommandText = "SELECT key0, key1, key2, key3, key4, key5 FROM Keys WHERE songid = @songId";
+            command.CommandText = "SELECT key0, key1, key2, key3, key4, key5 FROM Keys WHERE songid = @songId"; // Fetch the highlights
             using var reader = await command.ExecuteReaderAsync();
             if (await reader.ReadAsync())
             {
                 for (int i = 0; i < 6; i++)
                 {
-                    if (reader[$"key{i}"] == DBNull.Value)
-                    {
-                        songKeys[i] = "N/A";
-                    }
-                    else
-                    {
-                        songKeys[i] = await ConvertSongLength(Convert.ToInt32(reader[$"key{i}"]));
-                    }
+                    songKeys[i] = reader[$"key{i}"] == DBNull.Value || reader[$"key{i}"] == null // Check if the key is null
+                        ? null 
+                        : await ConvertSongLength(Convert.ToInt32(reader[$"key{i}"])); // Convert the song length to a readable format
                 }
             }
+        }
+        else
+        {
+            // Clear the songKeys array if no highlights are found
+            Array.Clear(songKeys, 0, songKeys.Length);
         }
     }
 
     private Task<string> ConvertSongLength(int start)
     {
-        string songLength = $"{start / 60}:{start % 60:D2}";
+        string songLength = $"{start / 60}:{start % 60:D2}"; // Convert the song length to a readable format
         return Task.FromResult(songLength);
     }
 
     private void Clear()
     {
         Array.Clear(songKeys);
-        selectedTrack = null;
+        selectedTrack = null;       // A method to clear all the selected data
         selectedPlaylist = null;
         suggestedTracks.Clear();
         suggestedPlaylists.Clear();

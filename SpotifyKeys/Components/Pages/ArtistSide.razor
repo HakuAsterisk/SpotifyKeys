@@ -9,6 +9,11 @@
 <MudContainer Class="mt-12" MaxWidth="MaxWidth.Small">
     <div class="mud-elevation-20 pa-8">
 
+        @if (@alert == "Please enter a search query." || @alert == "No track found :(")
+        {
+            <MudAlert Severity="Severity.Error" Class="ma-4 mb-8">@alert</MudAlert>
+        }
+
         <MudTextField @bind-Value="@searchQuery" Label="Search for the song you'd like to highlight" Variant="Variant.Filled" 
         Required="true" RequiredError="Please enter query!" />
 
@@ -32,6 +37,11 @@
                 </MudCardContent>
             </MudCard>
         </div>
+        }
+
+        @if (@alert == "Highlight saved successfully.")
+        {
+            <MudAlert Severity="Severity.Info" Class="ma-4 mb-8">@alert</MudAlert>
         }
 
         <div class="d-flex justify-center">
